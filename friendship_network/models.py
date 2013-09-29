@@ -187,25 +187,7 @@ class FriendshipManager(object):
         user1.friends.disconnect(user2)
         return True
 
-    @staticmethod
-    def get_requested_friends(user_id):
-        """
-        Finds who the user wanted to be friends with.
-        :param user_id: requester user.
-        :return: requested target users.
-        """
-        node = FriendshipManager.get_nodes(user_id)[0]
-        return node.requests.all()
-
-    @staticmethod
-    def get_requesting_friends(user_id):
-        """
-        Finds who wants to be friends with the user.
-        :param user_id: the target user.
-        :return: requester (source) users.
-        """
-        node = FriendshipManager.get_nodes(user_id)[0]
-        return node.incoming_requests.all()
+    # ============ REQUESTS =================
 
     @staticmethod
     def get_sent_requests(user_id):
@@ -232,15 +214,24 @@ class FriendshipManager(object):
         return rels
 
     @staticmethod
-    def get_incoming_request_count(user_id):
+    def get_requested_friends(user_id):
         """
-        Returns the number of incoming requests
-        for the given user id.
-        :param user_id: user_id.
-        :return: number of incoming requests
+        Finds who the user wanted to be friends with.
+        :param user_id: requester user.
+        :return: requested target users.
         """
         node = FriendshipManager.get_nodes(user_id)[0]
-        return node.incoming_requests.count()
+        return node.requests.all()
+
+    @staticmethod
+    def get_requesting_friends(user_id):
+        """
+        Finds who wants to be friends with the user.
+        :param user_id: the target user.
+        :return: requester (source) users.
+        """
+        node = FriendshipManager.get_nodes(user_id)[0]
+        return node.incoming_requests.all()
 
     @staticmethod
     def get_unread_incoming_requests(user_id):
@@ -251,6 +242,19 @@ class FriendshipManager(object):
         """
         return [req for req in FM.get_incoming_requests(user_id)
                 if not req.viewed]
+
+    # =========== COUNTS ====================
+
+    @staticmethod
+    def get_incoming_request_count(user_id):
+        """
+        Returns the number of incoming requests
+        for the given user id.
+        :param user_id: user_id.
+        :return: number of incoming requests
+        """
+        node = FriendshipManager.get_nodes(user_id)[0]
+        return node.incoming_requests.count()
 
     @staticmethod
     def get_unread_incoming_request_count(user_id):
