@@ -2,9 +2,9 @@ from django.utils.translation import ugettext_lazy as _
 
 from datetime import datetime
 from neomodel import (StructuredNode, StringProperty, IntegerProperty,
-    RelationshipTo, Relationship, RelationshipFrom, StructuredRel, DateTimeProperty, BooleanProperty)
+                      RelationshipTo, Relationship, RelationshipFrom,
+                      StructuredRel, DateTimeProperty, BooleanProperty)
 import pytz
-
 
 
 class DummyMeta:
@@ -127,6 +127,7 @@ class FriendshipManager(object):
         from_user, to_user = FriendshipManager.get_nodes(from_id, to_id)
         req = from_user.requests.connect(to_user, {'message': message})
         req.save()
+        return True
 
     @staticmethod
     def cancel_friendship_request(from_id, to_id):
@@ -139,6 +140,7 @@ class FriendshipManager(object):
 
         from_user, to_user = FriendshipManager.get_nodes(from_id, to_id)
         from_user.requests.disconnect(to_user)
+        return True
 
     @staticmethod
     def get_friends(user_id):
@@ -149,6 +151,29 @@ class FriendshipManager(object):
         """
         node = FriendshipManager.get_nodes(user_id)[0]
         return [friend.user_id for friend in node.friends.all()]
+
+    @staticmethod
+    def are_friends(user_id1, user_id2):
+        """
+        Returns if the given two users are friends or not.
+        :param user_id1: user 1
+        :param user_id2: user 2
+        :return: True if they are friends.
+        """
+        user1, user2 = FriendshipManager.get_nodes(user_id1, user_id2)[0]
+        return user1.friends.is_connected(user2)
+
+    @staticmethod
+    def remove_friend(user_id1, user_id2):
+        """
+        Removes the friendship between the given two users.
+        :param user_id1: user 1 id
+        :param user_id2: user 2 id
+        :return: True if successful.
+        """
+        user1, user2 = FriendshipManager.get_nodes(user_id1, user_id2)[0]
+        user1.friends.disconnect(user2)
+        return True
 
     @staticmethod
     def get_requested_friends(user_id):
@@ -206,15 +231,23 @@ class FriendshipManager(object):
         return node.incoming_requests.count()
 
     @staticmethod
+    def get_unread_incoming_requests(user_id):
+        """
+        Returns the unread incoming requests.
+        :param user_id: user_id.
+        :return: unread incoming requests.
+        """
+        return [req for req in FM.get_incoming_requests(user_id)
+                if not req.viewed]
+
+    @staticmethod
     def get_unread_incoming_request_count(user_id):
         """
         Returns the number of unread incoming requests.
         :param user_id: user_id.
         :return: number of unread incoming requests.
         """
-        counter = len([req for req in FM.get_incoming_requests(user_id)
-                 if not req.viewed])
-        return counter
+        return len(FriendshipManager.get_unread_incoming_requests(user_id))
 
     @staticmethod
     def get_sent_request_count(user_id):
@@ -226,6 +259,52 @@ class FriendshipManager(object):
         """
         node = FriendshipManager.get_nodes(user_id)[0]
         return node.requests.count()
+
+
+class FollowManager(object):
+    @staticmethod
+    def is_following(user_id1, user_id2):
+        """
+        Returns if the user1 is following user2.
+        :param user_id1: user 1
+        :param user_id2: user 2
+        :return: True user1 follows user2.
+        """
+        user1, user2 = FriendshipManager.get_nodes(user_id1, user_id2)[0]
+        return user1.follows.is_connected(user2)
+
+    def get_followers(user_id):
+        """
+        Returns the follower user ids of the given user.
+        :param user_id: person who is being followed
+        :return: follower list.
+        """
+        pass
+
+    def get_following(user_id):
+        """
+        Returns the user list who the given user follows.
+        :param user_id: person who follows.
+        :return: following (target) list
+        """
+        pass
+
+    def follow(user_id1, user_id2):
+        """
+        user1 starts following user2.
+        :param user_id1: user 1
+        :param user_id2: user 2
+        :return: True if successful.
+        """
+        pass
+
+    def unfollow(user_id1, user_id2):
+        """
+        user1 unfollows user2.
+        :param user_id1: user 1
+        :param user_id2: user 2
+        :return: True if successful.
+        """
 
 
 eren = User.index.get(user_id=3)
