@@ -89,20 +89,18 @@ class User(StructuredNode):
                                          'friendship_request',
                                          model=FriendshipRequest)
 
-    follows = RelationshipTo('User', 'follows')
+    follows = RelationshipTo('User', 'follows', model=Follow)
+    followed_by = RelationshipFrom('User', 'follows', model=Follow)
 
     _meta = DummyMeta()
 
     def __repr__(self):
         return "User {0}".format(self.user_id)
 
-
 class Friendship(StructuredRel):
     """Friendship Relationship to be established
     between two User nodes."""
     created = DateTimeProperty(default=lambda: datetime.now(pytz.utc))
-    deleted = DateTimeProperty()
-    active = BooleanProperty(default=True)
 
 
 class FriendshipManager(object):
@@ -162,6 +160,18 @@ class FriendshipManager(object):
         """
         user1, user2 = FriendshipManager.get_nodes(user_id1, user_id2)[0]
         return user1.friends.is_connected(user2)
+
+    @staticmethod
+    def add_friend(user_id1, user_id2):
+        """
+        Establishes the friendship between the given two users.
+        :param user_id1: user 1 id
+        :param user_id2: user 2 id
+        :return: True if successful.
+        """
+        user1, user2 = FriendshipManager.get_nodes(user_id1, user_id2)[0]
+        user1.friends.connect(user2)
+        return True
 
     @staticmethod
     def remove_friend(user_id1, user_id2):
@@ -261,6 +271,12 @@ class FriendshipManager(object):
         return node.requests.count()
 
 
+class Follow(StructuredRel):
+    """Follow Relationship to be established
+    between two User nodes."""
+    created = DateTimeProperty(default=lambda: datetime.now(pytz.utc))
+
+
 class FollowManager(object):
     @staticmethod
     def is_following(user_id1, user_id2):
@@ -280,7 +296,8 @@ class FollowManager(object):
         :param user_id: person who is being followed
         :return: follower list.
         """
-        pass
+        node = FriendshipManager.get_nodes(user_id)[0]
+        return [friend.user_id for friend in node.followed_by.all()]
 
     @staticmethod
     def get_following(user_id):
@@ -289,7 +306,8 @@ class FollowManager(object):
         :param user_id: person who follows.
         :return: following (target) list
         """
-        pass
+        node = FriendshipManager.get_nodes(user_id)[0]
+        return [friend.user_id for friend in node.follows.all()]
 
     @staticmethod
     def follow(user_id1, user_id2):
@@ -299,7 +317,9 @@ class FollowManager(object):
         :param user_id2: user 2
         :return: True if successful.
         """
-        pass
+        user1, user2 = FriendshipManager.get_nodes(user_id1, user_id2)[0]
+        user1.follows.connect(user2)
+        return True
 
     @staticmethod
     def unfollow(user_id1, user_id2):
@@ -309,7 +329,10 @@ class FollowManager(object):
         :param user_id2: user 2
         :return: True if successful.
         """
-        pass
+        user1, user2 = FriendshipManager.get_nodes(user_id1, user_id2)[0]
+        user1.follows.disconnect(user2)
+        return True
+
 eren = User.index.get(user_id=3)
 emre = User.index.get(user_id=2)
 jim = User.index.get(user_id=1)
