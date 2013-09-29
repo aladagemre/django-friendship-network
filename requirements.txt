@@ -1,0 +1,5 @@
+Django>=1.4
+py2neo==1.5
+Rest==0.1
+pytz==2013b
+neomodel==0.3.6

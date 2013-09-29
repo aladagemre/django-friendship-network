@@ -1,7 +1,7 @@
 django-friendship-network
 =========================
 
-Django Friendship module that works on Neo4j. You need to have a Neo4j instance running.
+Django Friendship module that works on Neo4j. You need to have a Neo4j instance running. Tested under neo4j-community-1.9.4-unix.
 
 Requirements
 -------------
@@ -14,7 +14,7 @@ Usage
 ======
 Add ``friendship_network`` to ``INSTALLED_APPS``.
 
-To use ``django-friendship`` in your views::
+To use ``friendship_network`` in your views::
 
     from django.contrib.auth.models import User
     from friendship_network.models import FriendshipManager, FollowManager

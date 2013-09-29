@@ -273,6 +273,7 @@ class FollowManager(object):
         user1, user2 = FriendshipManager.get_nodes(user_id1, user_id2)[0]
         return user1.follows.is_connected(user2)
 
+    @staticmethod
     def get_followers(user_id):
         """
         Returns the follower user ids of the given user.
@@ -281,6 +282,7 @@ class FollowManager(object):
         """
         pass
 
+    @staticmethod
     def get_following(user_id):
         """
         Returns the user list who the given user follows.
@@ -289,6 +291,7 @@ class FollowManager(object):
         """
         pass
 
+    @staticmethod
     def follow(user_id1, user_id2):
         """
         user1 starts following user2.
@@ -298,6 +301,7 @@ class FollowManager(object):
         """
         pass
 
+    @staticmethod
     def unfollow(user_id1, user_id2):
         """
         user1 unfollows user2.
@@ -305,8 +309,7 @@ class FollowManager(object):
         :param user_id2: user 2
         :return: True if successful.
         """
-
-
+        pass
 eren = User.index.get(user_id=3)
 emre = User.index.get(user_id=2)
 jim = User.index.get(user_id=1)
