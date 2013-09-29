@@ -84,13 +84,15 @@ class User(StructuredNode):
     requests = RelationshipTo('User',
                               'friendship_request',
                               model=FriendshipRequest)
-
     incoming_requests = RelationshipFrom('User',
                                          'friendship_request',
                                          model=FriendshipRequest)
 
     follows = RelationshipTo('User', 'follows', model=Follow)
     followed_by = RelationshipFrom('User', 'follows', model=Follow)
+
+    bans = RelationshipTo('User', 'bans', model=Ban)
+    banned_by = RelationshipFrom('User', 'bans', model=Ban)
 
     _meta = DummyMeta()
 
@@ -332,6 +334,37 @@ class FollowManager(object):
         user1, user2 = FriendshipManager.get_nodes(user_id1, user_id2)[0]
         user1.follows.disconnect(user2)
         return True
+
+
+class Ban(StructuredRel):
+    created = DateTimeProperty(default=lambda: datetime.now(pytz.utc))
+
+
+class BanManager(object):
+    @staticmethod
+    def ban(user_id1, user_id2):
+        """
+        User 1 bans user 2.
+        :param user_id1: banner id
+        :param user_id2: bannee id
+        :return: True if successful.
+        """
+        user1, user2 = FriendshipManager.get_nodes(user_id1, user_id2)[0]
+        user1.bans.connect(user2)
+        return True
+
+    @staticmethod
+    def unban(user_id1, user_id2):
+        """
+        User 1 unbans user 2.
+        :param user_id1: banner id
+        :param user_id2: bannee id
+        :return: True if successful.
+        """
+        user1, user2 = FriendshipManager.get_nodes(user_id1, user_id2)[0]
+        user1.bans.disconnect(user2)
+        return True
+
 
 eren = User.index.get(user_id=3)
 emre = User.index.get(user_id=2)
