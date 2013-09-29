@@ -12,6 +12,8 @@ class DummyMeta:
 
 
 class FriendshipRequest(StructuredRel):
+    """Friendship request relationship between two User nodes.
+    May include message for user to introduce himself."""
     # TODO: write log and signals
     message = StringProperty()
     created = DateTimeProperty(default=lambda: datetime.now(pytz.utc))
@@ -74,6 +76,8 @@ class FriendshipRequest(StructuredRel):
 
 
 class User(StructuredNode):
+    """User nodes to represent django users
+    with their user_id, facebook_id."""
     user_id = IntegerProperty(unique_index=True)
     facebook_id = IntegerProperty(unique_index=True)
     friends = Relationship('User', 'friends_with')
@@ -94,6 +98,8 @@ class User(StructuredNode):
 
 
 class Friendship(StructuredRel):
+    """Friendship Relationship to be established
+    between two User nodes."""
     created = DateTimeProperty(default=lambda: datetime.now(pytz.utc))
     deleted = DateTimeProperty()
     active = BooleanProperty(default=True)
@@ -102,7 +108,7 @@ class Friendship(StructuredRel):
 class FriendshipManager(object):
     @staticmethod
     def get_nodes(*args):
-        """(int,...) -> tuple
+        """(int[,...]) -> tuple
         Returns the nodes corresponding the user ids.
         :return: Node objects.
         """
@@ -111,17 +117,36 @@ class FriendshipManager(object):
 
     @staticmethod
     def send_friendship_request(from_id, to_id, message):
+        """
+        Sends friendship request.
+        :param from_id: the requester user id.
+        :param to_id: the requestee user id.
+        :param message: message to introduce yourself.
+        :return:
+        """
         from_user, to_user = FriendshipManager.get_nodes(from_id, to_id)
         req = from_user.requests.connect(to_user, {'message': message})
         req.save()
 
     @staticmethod
     def cancel_friendship_request(from_id, to_id):
+        """
+        Cancels the friendhip request.
+        :param from_id: the requester user id.
+        :param to_id: the requestee user id.
+        :return:
+        """
+
         from_user, to_user = FriendshipManager.get_nodes(from_id, to_id)
         from_user.requests.disconnect(to_user)
 
     @staticmethod
     def get_friends(user_id):
+        """
+        Returns the user ids of the friends of the given user.
+        :param user_id: user_id to get the friends of.
+        :return: friends of the given user.
+        """
         node = FriendshipManager.get_nodes(user_id)[0]
         return [friend.user_id for friend in node.friends.all()]
 
@@ -147,6 +172,11 @@ class FriendshipManager(object):
 
     @staticmethod
     def get_sent_requests(user_id):
+        """
+        Returns the sent request objects.
+        :param user_id: user_id
+        :return: sent FriendshipRequest object list
+        """
         node = FriendshipManager.get_nodes(user_id)[0]
         rels = [node.requests.relationship(target)
                 for target in node.requests.all()]
@@ -154,6 +184,11 @@ class FriendshipManager(object):
 
     @staticmethod
     def get_incoming_requests(user_id):
+        """
+        Returns the incoming request objects.
+        :param user_id: user_id
+        :return: incoming FriendshipRequest object list.
+        """
         node = FriendshipManager.get_nodes(user_id)[0]
         rels = [node.incoming_requests.relationship(target)
                 for target in node.incoming_requests.all()]
@@ -169,6 +204,17 @@ class FriendshipManager(object):
         """
         node = FriendshipManager.get_nodes(user_id)[0]
         return node.incoming_requests.count()
+
+    @staticmethod
+    def get_unread_incoming_request_count(user_id):
+        """
+        Returns the number of unread incoming requests.
+        :param user_id: user_id.
+        :return: number of unread incoming requests.
+        """
+        counter = len([req for req in FM.get_incoming_requests(user_id)
+                 if not req.viewed])
+        return counter
 
     @staticmethod
     def get_sent_request_count(user_id):
