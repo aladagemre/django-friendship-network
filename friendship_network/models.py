@@ -1,14 +1,21 @@
-from django.utils.translation import ugettext_lazy as _
-
 from datetime import datetime
 from neomodel import (StructuredNode, StringProperty, IntegerProperty,
                       RelationshipTo, Relationship, RelationshipFrom,
-                      StructuredRel, DateTimeProperty, BooleanProperty)
+                      StructuredRel, DateTimeProperty)
 import pytz
 
 
 class DummyMeta:
     fields = []
+
+class Follow(StructuredRel):
+    """Follow Relationship to be established
+    between two User nodes."""
+    created = DateTimeProperty(default=lambda: datetime.now(pytz.utc))
+
+
+class Ban(StructuredRel):
+    created = DateTimeProperty(default=lambda: datetime.now(pytz.utc))
 
 
 class FriendshipRequest(StructuredRel):
@@ -98,6 +105,7 @@ class User(StructuredNode):
 
     def __repr__(self):
         return "User {0}".format(self.user_id)
+
 
 class Friendship(StructuredRel):
     """Friendship Relationship to be established
@@ -277,12 +285,6 @@ class FriendshipManager(object):
         return node.requests.count()
 
 
-class Follow(StructuredRel):
-    """Follow Relationship to be established
-    between two User nodes."""
-    created = DateTimeProperty(default=lambda: datetime.now(pytz.utc))
-
-
 class FollowManager(object):
     @staticmethod
     def is_following(user_id1, user_id2):
@@ -340,10 +342,6 @@ class FollowManager(object):
         return True
 
 
-class Ban(StructuredRel):
-    created = DateTimeProperty(default=lambda: datetime.now(pytz.utc))
-
-
 class BanManager(object):
     @staticmethod
     def ban(user_id1, user_id2):
@@ -370,8 +368,8 @@ class BanManager(object):
         return True
 
 
-eren = User.index.get(user_id=3)
-emre = User.index.get(user_id=2)
-jim = User.index.get(user_id=1)
-
-FM = FriendshipManager
+"""
+user1 = User.index.get(user_id=1)
+user2 = User.index.get(user_id=2)
+user3 =  User.index.get(user_id=3)
+FM = FriendshipManager"""
