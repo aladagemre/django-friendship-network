@@ -1,13 +1,20 @@
 django-friendship-network
 =========================
 
-Django Friendship module that works on Neo4j. You need to have a Neo4j instance running. Tested under neo4j-community-1.9.4-unix.
+Django Friendship module that works on Neo4j. 
+
+You need to have a Neo4j instance running. Tested under neo4j-community-1.9.4-unix.
+
+Why?
+-----
+Using Graph databases instead of relational databases allows us performing complex graph operations such as friend suggestion and further social network analysis.
+
 
 Requirements
 -------------
-Django >= 1.4
-neomodel
-pytz
+* ``Django >= 1.4``
+* ``neomodel``
+* ``pytz``
 
 
 Usage
@@ -73,3 +80,9 @@ To use ``friendship_network`` in your views::
         
         # User removes ban on another user.
         BanManager.unban(request.user.pk, other_user.pk)
+        
+
+TODO
+=====
+* Friend suggestion
+* Hiding banned users.
